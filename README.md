@@ -129,7 +129,7 @@ With a separate supply, the strip takes its power from the supply, and the suppl
 You only need a browser. There's nothing to install and nothing to build.
 
 1. Plug the ESP32 into your computer with a USB cable.
-2. Open the **[LobserLamp web flasher](https://WEB-FLASHER-URL/)** in **Chrome** or **Edge** on a computer. Firefox, Safari and phones can't do this.
+2. Open the **[LobserLamp web flasher](https://eliasm86.github.io/LobserLamp/)** in **Chrome** or **Edge** on a computer. Firefox, Safari and phones can't do this.
 3. Click **Install**, choose the ESP32's port in the list, and confirm.
 4. Wait about a minute while it flashes. When it's done, the flasher offers **Connect to Wi-Fi**. Pick your network, type the password, and click **Visit device**.
 
@@ -406,3 +406,4 @@ All settings are saved to flash and survive restarts and power cuts. The default
 | [src/ha_mqtt.cpp](src/ha_mqtt.cpp) | Home Assistant MQTT discovery and control |
 | [src/serial_setup.cpp](src/serial_setup.cpp) | Serial commands and Improv Serial |
 | [src/printer.cpp](src/printer.cpp) | Printer status mode: Bambu Lab connection and per-status looks |
+| [flasher/](flasher/) | Web flasher page, published to GitHub Pages by [.github/workflows/flasher.yml](.github/workflows/flasher.yml) |

@@ -1,0 +1,65 @@
+# Builds the firmware and publishes the web flasher (flasher/) to GitHub Pages.
+# Runs on every push to main that touches the firmware or the flasher, or by hand.
+name: Web flasher
+
+on:
+  push:
+    branches: [main]
+    paths: [src/**, include/**, lib/**, platformio.ini, flasher/**, .github/workflows/flasher.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ hashFiles('platformio.ini') }}
+
+      - name: Build firmware
+        run: |
+          pip install platformio esptool
+          pio run -e esp32-devkitlipo
+
+      - name: Merge into one image
+        run: |
+          B=.pio/build/esp32-devkitlipo
+          BOOT_APP0=$(find ~/.platformio/packages/framework-arduinoespressif32 -name boot_app0.bin | head -n 1)
+          mkdir -p site
+          cp flasher/index.html flasher/manifest.json site/
+          esptool.py --chip esp32 merge_bin -o site/lobserlamp.bin \
+            --flash_mode dio --flash_freq 40m --flash_size 4MB \
+            0x1000 $B/bootloader.bin 0x8000 $B/partitions.bin \
+            0xe000 "$BOOT_APP0" 0x10000 $B/firmware.bin
+          VERSION=$(date -u +%Y.%m.%d)-${GITHUB_SHA::7}
+          sed -i "s/VERSION/$VERSION/g" site/index.html site/manifest.json
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
