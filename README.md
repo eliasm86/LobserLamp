@@ -39,7 +39,7 @@ You don't need to write code or install anything. If you can plug in a USB cable
 
 | Part | What to buy |
 |---|---|
-| **ESP32 board** | The firmware is built for the Olimex ESP32-DevKit-LiPo, but most classic **ESP32 dev boards** work. It needs a **5V** pin (sometimes labelled **VIN** or **VBUS**) to power the strip. Not sure about your board? See [which ESP32 variants work](#other-boards). |
+| **ESP32 board** | Most classic **ESP32 dev boards** (such as the Olimex ESP32-DevKit-LiPo), or the tiny, cheap **ESP32-C3 Super Mini**. It needs a **5V** pin (sometimes labelled **VIN** or **VBUS**) to power the strip. Not sure about your board? See [which ESP32 variants work](#other-boards). |
 | **LED strip** | An addressable **5 V RGB** strip, such as **WS2812B** (the most common), WS2812, WS2813 or SK6812 RGB. The standard lamp uses **31 LEDs**; up to 127 are supported. |
 | **USB phone charger** (1 A or more) and a USB cable | Powers the whole lamp. A computer's USB port works for flashing, but may not give enough current to light the LEDs brightly. |
 | **3 wires**, and optionally a **330 Ω resistor** | The resistor makes the data signal cleaner. |
@@ -73,7 +73,7 @@ An LED strip has three wires: **5V** (power), **GND** (ground) and **DIN** (data
 
 1. **Strip 5V → the board's 5V pin.** The strip gets its power from the USB cable, through the board.
 2. **Strip GND → the board's GND pin.**
-3. **Strip DIN → GPIO 13**, ideally through a 330 Ω resistor. GPIO 13 is the default; you can pick another pin later on the setup page.
+3. **Strip DIN → GPIO 13**, ideally through a 330 Ω resistor. GPIO 13 is the default; you can pick another pin later on the setup page. **On an ESP32-C3 Super Mini, use GPIO 4 instead**: it sits right next to the 5V and GND pins.
 4. **Plug the board into a USB phone charger.** For flashing, plug it into your computer instead.
 
 That's the whole build.
@@ -329,7 +329,8 @@ For development, or if you can't use the web flasher:
 2. Open this folder, connect the ESP32 over USB, and run **PlatformIO: Upload**, or from a terminal:
 
    ```sh
-   pio run -t upload
+   pio run -t upload                          # classic ESP32
+   pio run -e esp32-c3-supermini -t upload    # ESP32-C3 Super Mini
    pio device monitor        # serial monitor, 115200 baud
    ```
 
@@ -341,9 +342,9 @@ The lamp needs an ESP32 with **built-in WiFi**. The firmware only uses standard 
 
 | Chip | Works? | Notes |
 |---|---|---|
-| **ESP32** (the classic one: ESP32-WROOM-32, WROVER, DevKitC, Olimex DevKit-LiPo…) | ✅ **Yes** | What the firmware is built and tested for. The web flasher installs this version. For boards other than the Olimex, building from source with `board = esp32dev` is the safe choice. |
+| **ESP32** (the classic one: ESP32-WROOM-32, WROVER, DevKitC, Olimex DevKit-LiPo…) | ✅ **Yes** | What the firmware is built and tested for. The web flasher installs this version automatically. For boards other than the Olimex, building from source with `board = esp32dev` is the safe choice. |
 | **ESP32-S3** | 🟡 Should work, untested | Build from source with your board in [platformio.ini](platformio.ini). On boards with octal PSRAM (N8R8, N16R8…), don't use GPIO 35–37 for the strip. |
-| **ESP32-C3** | 🟡 Should work, untested | Build from source, but **change the default LED pin first**: GPIO 13 is a flash pin on the C3. Set `DEF_LED_PIN` in [src/settings.cpp](src/settings.cpp) to a free pin, such as GPIO 4. |
+| **ESP32-C3** (Super Mini and other C3 boards) | ✅ **Yes** | The web flasher detects the C3 and installs the C3 version automatically. The LED strip defaults to **GPIO 4**. GPIO 9 (the BOOT button) and the flash, USB and serial pins are left out of the pin list. Some cheap Super Mini batches have weak WiFi because of their antenna design, so keep the lamp near your router if it keeps dropping out. |
 | **ESP32-S2** | ⚠️ Not recommended | Untested, and the pin list doesn't leave out the S2's flash pins, so it's easy to pick one that crashes the board. |
 | **ESP32-C6** | ❌ Not with this setup | Needs a newer Arduino core (3.x) than this project's PlatformIO platform uses. |
 | **ESP32-H2, ESP32-P4** | ❌ No | No built-in WiFi. |
@@ -377,7 +378,7 @@ Used on first boot, until you change them:
 
 | Setting | Default |
 |---|---|
-| LED pin / count / colour order | GPIO 13 / 31 / GRB |
+| LED pin / count / colour order | GPIO 13 (GPIO 4 on the C3) / 31 / GRB |
 | Max brightness | 255 (100 %) |
 | Device name / hostname | `LobserLamp` / `lobserlamp` |
 | MQTT | Off (port 1883) |

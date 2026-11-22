@@ -9,7 +9,11 @@ namespace {
 const char* const DEF_DEVICE_NAME    = "LobserLamp";
 const char* const DEF_HOSTNAME       = "lobserlamp";
 const uint16_t    DEF_MQTT_PORT      = 1883;
+#if CONFIG_IDF_TARGET_ESP32C3
+const uint8_t     DEF_LED_PIN        = 4;    // C3 Super Mini: next to the 5V and GND pins
+#else
 const uint8_t     DEF_LED_PIN        = 13;
+#endif
 const uint8_t     DEF_LED_COUNT      = 31;
 const uint8_t     DEF_LED_ORDER      = 0;    // GRB = WS2812B
 const uint8_t     DEF_MAX_BRIGHTNESS = 255;
@@ -36,7 +40,8 @@ bool validPin(int p) {
 #elif CONFIG_IDF_TARGET_ESP32S3
   if (p == 19 || p == 20 || (p >= 26 && p <= 32) || p == 43 || p == 44) return false;
 #elif CONFIG_IDF_TARGET_ESP32C3
-  if ((p >= 12 && p <= 21)) return false;
+  // 11: flash power, 12-17: flash, 18-19: USB, 20-21: serial, 9: BOOT button
+  if (p == 9 || (p >= 11 && p <= 21)) return false;
 #endif
   return true;
 }
