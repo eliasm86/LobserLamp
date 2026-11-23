@@ -22,6 +22,15 @@ uint32_t lastRetryMs = 0;
 
 bool hasWifi() { return !settings::get().wifiSsid.isEmpty(); }
 
+// The C3 Super Mini's antenna sits right next to the crystal and regulator; at full
+// TX power the signal distorts and many routers refuse it. Lower power connects far
+// more reliably. Must be called after every WiFi.mode() change.
+void tuneRadio() {
+#if CONFIG_IDF_TARGET_ESP32C3
+  WiFi.setTxPower(WIFI_POWER_8_5dBm);
+#endif
+}
+
 void connectSta() {
   const settings::Settings& s = settings::get();
   WiFi.begin(s.wifiSsid.c_str(), s.wifiPass.c_str());
@@ -31,6 +40,7 @@ void connectSta() {
 void startAp() {
   WiFi.mode(WIFI_AP_STA);
   WiFi.softAP(apSsid.c_str());  // open network, so phones can join without a password
+  tuneRadio();
   // STA reconnect attempts make the radio hop channels and drop hotspot clients,
   // so automatic reconnect is off while the hotspot is up and we retry manually.
   WiFi.setAutoReconnect(false);
@@ -57,6 +67,7 @@ namespace netmgr {
 void begin() {
   const settings::Settings& s = settings::get();
   WiFi.mode(WIFI_STA);
+  tuneRadio();
   WiFi.setHostname(s.hostname.c_str());
   WiFi.setAutoReconnect(true);
 
