@@ -130,11 +130,8 @@ void handleIdentify() {
 // Async WiFi scan: the first call starts it, later calls return the result
 void handleScan() {
   JsonDocument d;
-  int n = WiFi.scanComplete();
-  if (n == WIFI_SCAN_FAILED) {
-    WiFi.scanNetworks(true);
-    d["scanning"] = true;
-  } else if (n == WIFI_SCAN_RUNNING) {
+  int n = netmgr::scan();
+  if (n < 0) {
     d["scanning"] = true;
   } else {
     JsonArray nets = d["networks"].to<JsonArray>();

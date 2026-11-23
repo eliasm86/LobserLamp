@@ -101,7 +101,7 @@ void handleRpc(const uint8_t* d, uint8_t n) {
       break;
     case CMD_SCAN:
       scanPending = true;
-      if (WiFi.scanComplete() == WIFI_SCAN_FAILED) WiFi.scanNetworks(true);
+      netmgr::scan();
       break;
     default:
       sendError(ERR_UNKNOWN_RPC);
@@ -129,8 +129,7 @@ void improvLoop() {
   }
 
   if (scanPending) {
-    int n = WiFi.scanComplete();
-    if (n == WIFI_SCAN_FAILED) WiFi.scanNetworks(true);  // results were taken by the web page, scan again
+    int n = netmgr::scan();  // also starts a new scan if the web page took the results
     if (n < 0) return;
     for (int i = 0; i < n; i++) {
       String ssid = WiFi.SSID(i);

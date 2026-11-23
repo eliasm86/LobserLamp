@@ -119,6 +119,25 @@ void loop() {
 
 bool apActive() { return ap; }
 
+int scan() {
+  static bool scanning = false;
+  static uint32_t startMs = 0;
+  const uint32_t SCAN_WAIT_MS = 15000;
+
+  int n = WiFi.scanComplete();
+  if (n >= 0) { scanning = false; return n; }
+  // The core reports a scan as failed after 6 s, but with the hotspot running a scan
+  // can take longer. Its result still arrives, so keep waiting: starting over would
+  // throw it away (and the next scan could time out the same way).
+  if (scanning && millis() - startMs < SCAN_WAIT_MS) return WIFI_SCAN_RUNNING;
+  if (n == WIFI_SCAN_RUNNING) return n;
+  if (WiFi.scanNetworks(true) == WIFI_SCAN_RUNNING) {
+    scanning = true;
+    startMs = millis();
+  }
+  return WIFI_SCAN_RUNNING;
+}
+
 void tryWifi(const String& ssid, const String& pass) {
   trying = true;
   WiFi.disconnect();

@@ -11,6 +11,11 @@ void loop();
 bool apActive();
 void writeStatus(JsonObject out);
 
+// Async WiFi scan, shared by the setup page and Improv. Starts a scan if none is
+// running; returns the network count once done (read with WiFi.SSID(i) etc., then
+// call WiFi.scanDelete()), or WIFI_SCAN_RUNNING while still scanning.
+int scan();
+
 // Test new credentials without saving them (Improv). Hotspot start/retry logic
 // is paused until endTry(). On failure the saved network is reconnected.
 void tryWifi(const String& ssid, const String& pass);
